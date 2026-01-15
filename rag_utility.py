@@ -6,8 +6,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
-import streamlit as st
-groq_api_key = st.secrets["GROQ_API_KEY"]
+# import streamlit as st
+# groq_api_key = st.secrets["GROQ_API_KEY"]
 
 
 working_dir = os.path.dirname(os.path.abspath((__file__)))
