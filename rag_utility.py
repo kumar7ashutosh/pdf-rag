@@ -1,6 +1,7 @@
 import os
 from langchain_classic.chains import RetrievalQA
-from langchain_community.document_loaders import DirectoryLoader,UnstructuredFileLoader
+from langchain_community.document_loaders import DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -18,7 +19,7 @@ llm=ChatGroq(
 )
 
 def process_document_to_chroma_db(file_name):
-    loader=UnstructuredFileLoader(f"{working_dir}/{file_name}")
+    loader=PyPDFLoader(f"{working_dir}/{file_name}")
     documents=loader.load()
     text_splitter=RecursiveCharacterTextSplitter(
         chunk_size=2000,
