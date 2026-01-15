@@ -1,0 +1,16 @@
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+chromadb
+langchain-chroma
+langchain-groq
+langchain-classic
+sentence-transformers
+unstructured
+unstructured[pdf]
+nltk
+llama-index
+llama-index-llms-groq
+llama-index-embeddings-huggingface
+llama-index-vector-stores-chroma
+streamlit
