@@ -11,7 +11,11 @@ from langchain_groq import ChatGroq
 
 
 working_dir = os.path.dirname(os.path.abspath((__file__)))
-embedding = HuggingFaceEmbeddings()
+embedding = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False}
+)
 
 llm=ChatGroq(
     model="llama-3.1-8b-instant",
