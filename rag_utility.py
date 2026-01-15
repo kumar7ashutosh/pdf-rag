@@ -23,32 +23,59 @@ llm=ChatGroq(
 )
 
 def process_document_to_chroma_db(file_name):
-    loader=PyPDFLoader(f"{working_dir}/{file_name}")
-    documents=loader.load()
-    text_splitter=RecursiveCharacterTextSplitter(
+    import shutil
+
+    VECTORSTORE_DIR = "/tmp/doc_vectorstore"
+
+    # 🔥 Always reset vectorstore (Streamlit-safe)
+    if os.path.exists(VECTORSTORE_DIR):
+        shutil.rmtree(VECTORSTORE_DIR)
+
+    loader = PyPDFLoader(os.path.join(working_dir, file_name))
+    documents = loader.load()
+
+    if not documents:
+        raise RuntimeError("No documents loaded from PDF")
+
+    text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=2000,
         chunk_overlap=200
     )
-    texts=text_splitter.split_documents(documents)
-    vectordb = Chroma.from_documents(
+    texts = text_splitter.split_documents(documents)
+
+    if not texts:
+        raise RuntimeError("Text splitting produced no chunks")
+
+    # ✅ HARD embedding sanity check
+    test_embedding = embedding.embed_query("hello world")
+    if not test_embedding or len(test_embedding) == 0:
+        raise RuntimeError("Embedding model returned empty vector")
+
+    # ✅ Create Chroma
+    Chroma.from_documents(
         documents=texts,
         embedding=embedding,
-        persist_directory=f"{working_dir}/doc_vectorstore"
+        persist_directory=VECTORSTORE_DIR
     )
-    return 0
+
+    return True
+
 
 def answer_question(user_question):
+    VECTORSTORE_DIR = "/tmp/doc_vectorstore"
+
     vectordb = Chroma(
-        persist_directory=f"{working_dir}/doc_vectorstore",
+        persist_directory=VECTORSTORE_DIR,
         embedding_function=embedding
     )
-    retriever = vectordb.as_retriever()
+
+    retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
         retriever=retriever,
     )
-    response = qa_chain.invoke({"query": user_question})
-    answer = response["result"]
 
-    return answer   
+    response = qa_chain.invoke({"query": user_question})
+    return response["result"]
